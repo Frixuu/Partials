@@ -1,5 +1,10 @@
-# haxe-partials
-[![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](https://github.com/FuzzyWuzzie/haxe-partials/blob/master/LICENSE)
+# Partials
+
+[![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](https://github.com/Frixuu/Partials/blob/master/LICENSE)
+
+Fork of <https://github.com/hamaluik/haxe-partials>.
+
+---
 
 A simple macro library for writing classes as partials (splitting a single class into multiple source files). In the context of this library, partials are the same as [C# partials](https://msdn.microsoft.com/en-CA/library/wa80x488.aspx), and really just allow for a bit more organization.
 
@@ -52,7 +57,7 @@ class PartialDefinitionB implements partials.Partial {
 
 This would output:
 
-```
+```text
 My partials are here!
 FOO!
 BAR!

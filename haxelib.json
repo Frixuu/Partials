@@ -1,11 +1,16 @@
 {
   "name": "partials",
-  "url" : "https://github.com/FuzzyWuzzie/haxe-partials",
+  "url": "https://github.com/Frixuu/Partials",
   "license": "MIT",
-  "tags": ["cross", "utility"],
+  "tags": [
+    "cross",
+    "utility"
+  ],
   "description": "A simple macro library for writing classes as partials (splitting a single class into multiple source files).",
-  "version": "1.0.0",
-  "releasenote": "Initial release, basic testing shows all systems are go!",
-  "contributors": ["FuzzyWuzzie"],
+  "version": "1.1.0",
+  "releasenote": "Updated for Haxe 4; now supporting multiple meta annotations.",
+  "contributors": [
+    "frixuu"
+  ],
   "dependencies": {}
 }
