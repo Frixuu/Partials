@@ -12,5 +12,6 @@
   "contributors": [
     "frixuu"
   ],
+  "classPath": "src",
   "dependencies": {}
 }
