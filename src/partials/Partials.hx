@@ -6,6 +6,8 @@ import haxe.macro.Expr;
 import haxe.rtti.Meta;
 import haxe.ds.StringMap;
 
+using Lambda;
+
 /**
  * Utility macros for defining multiple parts of a class in different files. To define a class
  * as a partial, simply implement the partials.Partial interface. To indicate the "host" class
@@ -55,7 +57,7 @@ import haxe.ds.StringMap;
 class Partials {
     private static var partials: StringMap<Array<Field>> = new StringMap<Array<Field>>();
 
-    private static function getModuleName(e: Expr): String {
+    private static function getModuleName(e: Expr): Null<String> {
         return switch (e.expr) {
             case EConst(c):
                 switch (c) {
@@ -69,32 +71,45 @@ class Partials {
     }
 
     macro public static function process(): Array<Field> {
-        var localFields: Array<Field> = Context.getBuildFields();
 
-        // see if it is a partial host
-        if (Context.getLocalClass().get().meta.has(":partials")) {
-            // yup, it is!
-            var params: Array<Expr> = Context.getLocalClass().get().meta.extract(":partials")[0].params;
-            for (param in params) {
-                // force-import the referenced module
-                var moduleName: String = getModuleName(param);
-                Context.getModule(moduleName);
+        final localClass = Context.getLocalClass().get();
+        final localFields = Context.getBuildFields();
 
-                // ok, now that it's imported, bring in all of its fields
-                var moduleFields: Array<Field> = partials.get(moduleName);
-                for (field in moduleFields) {
-                    field.pos = Context.currentPos();
-                    localFields.push(field);
+        // Is it a partial "host"?
+        final meta = localClass.meta;
+        if (meta.has(":partials")) {
+
+            // If so, get the modules it is referencing
+            final currentPos = Context.currentPos();
+            for (candidate in meta.extract(":partials").flatMap(e -> e.params)) {
+
+                // Force-import them
+                final moduleName = getModuleName(candidate);
+                for (module in Context.getModule(moduleName)) {
+                    switch (module) {
+                        case TInst(classType, _):
+                            final _ = classType.get();
+                        case _:
+                    }
+                }
+
+                // Bring in all of their fields
+                final moduleFields = partials.get(moduleName);
+                if (moduleFields == null) {
+                    Context.info('No cached fields for module $moduleName', currentPos);
+                } else {
+                    for (field in moduleFields) {
+                        field.pos = currentPos;
+                        localFields.push(field);
+                    }
                 }
             }
         } else {
-            // nope, just a regular partial
-            // save its fields
+            // No, this is a "guest".
+            // Save its fields and trash the class
             partials.set(Context.getLocalModule(), localFields);
-
-            // and trash it
-            Compiler.exclude(Context.getLocalModule());
-            return new Array<Field>();
+            localClass.exclude();
+            return [];
         }
 
         return localFields;
