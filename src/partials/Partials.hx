@@ -55,7 +55,12 @@ using Lambda;
  * ```
  */
 class Partials {
-    private static var partials: StringMap<Array<Field>> = new StringMap<Array<Field>>();
+
+    /**
+        Caches class fields, keyed by the module name.
+    **/
+    @:persistent
+    private static var cache: Map<String, Array<Field>> = new StringMap();
 
     private static function getModuleName(e: Expr): Null<String> {
         return switch (e.expr) {
@@ -94,9 +99,10 @@ class Partials {
                 }
 
                 // Bring in all of their fields
-                final moduleFields = partials.get(moduleName);
+                final moduleFields = cache.get(moduleName);
                 if (moduleFields == null) {
                     Context.info('No cached fields for module $moduleName', currentPos);
+                    Context.info("(Try restarting your language server?)", currentPos, 1);
                 } else {
                     for (field in moduleFields) {
                         field.pos = currentPos;
@@ -107,7 +113,7 @@ class Partials {
         } else {
             // No, this is a "guest".
             // Save its fields and trash the class
-            partials.set(Context.getLocalModule(), localFields);
+            cache.set(Context.getLocalModule(), localFields);
             localClass.exclude();
             return [];
         }
